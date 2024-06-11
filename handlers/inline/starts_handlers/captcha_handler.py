@@ -1,25 +1,30 @@
 import random
 
-from aiogram import Router, F
+from aiogram import F
 
 from aiogram import Router
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import CallbackQuery
 
-from database import add_user
-from keyboards.captcha import capthas_emojis
+from keyboards.inline.application_in import application_post
+from keyboards.inline.captcha import capthas_emojis
 
 router = Router()
+router.message.filter(
+    F.chat.type == "private"
+)
 emoji = ['😀️', '😃️', '😁️', '😎️', '🐶️', '🐱️', '🦎️', '🍏️', '🧂️', '🍳️', '🍆️', '🍉️', '⚽️', '🎱️', '🚲️', '🚗️', '⏰️', '🛢️',
          '💡️', '🧱️', '❤️', '🧡️', '💙️', '🖤️', '❌️', '🚭️', '💤️', '🍺️', '🍪️', '🍾️']
 
 
 @router.callback_query(F.data.contains('emoji'))
 async def message_with_text(call: CallbackQuery):
+    await call.answer()
     data = call.data.split('.')
     await call.answer()
     if data[1].strip() == data[2].strip():
         await call.message.answer('Вы прошли каптчу')
-        add_user(username=call.from_user.username, user_id=call.from_user.id)
+
+        await call.message.answer('📝Подайте заявку на вступление', reply_markup=application_post())
     else:
         str = []
         random.shuffle(emoji)
